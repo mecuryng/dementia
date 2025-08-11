@@ -55,7 +55,7 @@ uploaded_image = st.file_uploader("Upload MRI Image", type=["jpg", "png", "jpeg"
 
 # Clinical data input
 clinical_features = []
-feature_names = [f"Feature_{i}" for i in range(33)]  # Replace with actual names
+feature_names = [f"Feature_{i}" for i in range(10)]  # Replace with actual names
 for feature in feature_names:
     val = st.number_input(f"{feature}", value=0.0)
     clinical_features.append(val)
