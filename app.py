@@ -20,8 +20,16 @@ class CNN_MRI(nn.Module):
     def forward(self, x):
         return self.resnet(x)
 
+
+# Load model and fix key mismatch if needed
 mri_model = CNN_MRI()
-mri_model.load_state_dict(torch.load("mri_model.pth", map_location="cpu"))
+state_dict = torch.load("mri_model.pth", map_location="cpu")
+# Remove 'model.' prefix if present
+if any(k.startswith("model.") for k in state_dict.keys()):
+    new_state_dict = {k.replace("model.", "resnet.", 1): v for k, v in state_dict.items()}
+    mri_model.load_state_dict(new_state_dict)
+else:
+    mri_model.load_state_dict(state_dict)
 mri_model.eval()
 
 # Load XGBoost model
