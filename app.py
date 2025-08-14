@@ -53,20 +53,9 @@ uploaded_image = st.file_uploader("Upload MRI Image", type=["jpg", "png", "jpeg"
 
 # Clinical data input with descriptive labels
 clinical_features = []
-feature_labels = [
-    "Visit", 
-    "MR Delay", 
-    "Age", 
-    "EDUC", 
-    "SES", 
-    "MMSE", 
-    "CDR",
-    "eTIV", 
-    "nWBV", 
-    "ASF"
-]
-for label in feature_labels:
-    val = st.number_input(label, value=0)
+feature_names = [f"Feature_{i}" for i in range(33)]  # Replace with actual names
+for feature in feature_names:
+    val = st.number_input(f"{feature}", value=0.0)
     clinical_features.append(val)
 
 if st.button("Predict"):
