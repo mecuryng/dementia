@@ -1,4 +1,3 @@
-
 import streamlit as st
 import torch
 import torch.nn as nn
@@ -6,7 +5,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 import joblib
 import numpy as np
-
+from sklearn.preprocessing import StandardScaler
 # ==============================
 # Load Models
 # ==============================
@@ -19,8 +18,6 @@ class CNN_MRI(nn.Module):
 
     def forward(self, x):
         return self.resnet(x)
-
-
 # Load model and fix key mismatch if needed
 mri_model = CNN_MRI()
 state_dict = torch.load("mri_model.pth", map_location="cpu")
@@ -53,11 +50,23 @@ st.write("Upload an MRI image and enter clinical data for prediction.")
 # MRI upload
 uploaded_image = st.file_uploader("Upload MRI Image", type=["jpg", "png", "jpeg"])
 
-# Clinical data input
+
+# Clinical data input with descriptive labels
 clinical_features = []
-feature_names = [f"Feature_{i}" for i in range(33)]  # Replace with actual names
-for feature in feature_names:
-    val = st.number_input(f"{feature}", value=0.0)
+feature_labels = [
+    "Visit", 
+    "MR Delay", 
+    "Age", 
+    "EDUC", 
+    "SES", 
+    "MMSE", 
+    "CDR",
+    "eTIV", 
+    "nWBV", 
+    "ASF"
+]
+for label in feature_labels:
+    val = st.number_input(label, value=0)
     clinical_features.append(val)
 
 if st.button("Predict"):
@@ -69,13 +78,21 @@ if st.button("Predict"):
             mri_features = mri_model(image)
 
         # Process Tabular data
-        clinical_array = np.array(clinical_features).reshape(1, -1)
-        xgb_pred_prob = xgb_model.predict_proba(clinical_array)[:, 1]  # Probability for class 1
+        scaler = StandardScaler()
+        # Normalize the raw sample data point using the fitted scaler
+        scaled_sample_data_point = scaler.transform(clinical_features)
+
+        print(f"\nRaw Sample Data Point: {clinical_features}")
+        print(f"Scaled Sample Data Point: {scaled_sample_data_point}")
+
+
+        #clinical_array = np.array(clinical_features).reshape(1, -1)
+        xgb_pred_prob = xgb_model.predict_proba(scaled_sample_data_point)[:, 1]  # Probability for class 1
 
         # Combine (simple weighted fusion example)
         alpha, beta = 0.5, 0.5
         combined = alpha * mri_features.mean().item() + beta * xgb_pred_prob[0]
-
+        print(f"combined probability: {combined}")
         # Decision
         prediction = 1 if combined > 0.5 else 0
         st.success(f"Prediction: {'Dementia' if prediction==1 else 'No Dementia'}")
