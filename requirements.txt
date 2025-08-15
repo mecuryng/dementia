@@ -5,9 +5,4 @@ joblib
 Pillow
 numpy
 xgboost
-<<<<<<< HEAD
-scikit-learn
-=======
-scikit-learn
-sklearn
->>>>>>> b20e8623528cfd859e68b548b6a7281fd18bda2f
+
