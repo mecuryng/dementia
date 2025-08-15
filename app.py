@@ -92,7 +92,7 @@ feature_labels = [
     "MR Delay",
     "Age",
     "Education (years)",
-    "SES (0=Low, 1=Medium, 2=High)",
+    "SES",
     "MMSE Score",
     "Clinical Dementia Rating (CDR)",
     "eTIV (Estimated Total Intracranial Volume)",
@@ -137,6 +137,6 @@ if st.button("Predict"):
             # Decision
             prediction = 1 if combined > 0.5 else 0
             st.success(f"Prediction: {'Dementia' if prediction==1 else 'No Dementia'}")
-            st.success(f"Probability of prediction is: {combined:.4f}")
+            #st.success(f"Probability of prediction is: {combined:.4f}")
         except Exception as e:
             st.error(f"Prediction failed: {e}")
