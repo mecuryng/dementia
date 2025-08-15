@@ -84,16 +84,17 @@ uploaded_image = st.file_uploader("Upload MRI Image", type=["jpg", "png", "jpeg"
 st.subheader("Clinical Data Input")
 clinical_features = []
 feature_labels = [
-    "Age (years)",
-    "Gender (0=Male, 1=Female)",
-    "MMSE Score",
+    "Visit",
+    "MR Delay",
+    "Age",
     "Education (years)",
-    "APOE4 Status (0=No, 1=Yes)",
-    "Hippocampal Volume",
-    "Ventricular Volume",
-    "Cortical Thickness",
-    "CSF Tau Level",
-    "CSF Amyloid-beta Level"
+    "SES (0=Low, 1=Medium, 2=High)",
+    "MMSE Score",
+    "Clinical Dementia Rating (CDR)",
+    "eTIV (Estimated Total Intracranial Volume)",
+    "nWBV (Normalized Whole Brain Volume)",
+    "ASF (Atlas-based Segmentation Framework)",
+    
 ]
 for label in feature_labels:
     val = st.number_input(label, value=0)
