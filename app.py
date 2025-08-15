@@ -30,8 +30,7 @@ try:
         mri_model.load_state_dict(state_dict)
     mri_model.eval()
      # Display first few weights for verification
-    """first_weight = next(mri_model.resnet.parameters()).flatten()[:10].detach().cpu().numpy()
-    st.info(f"First 10 weights of loaded MRI model: {first_weight}")"""
+    
 except Exception as e:
     st.error(f"Error loading MRI model: {e}")
     mri_model = None 
@@ -133,12 +132,7 @@ if st.button("Predict"):
             mri_score = float(torch.sigmoid(torch.tensor(mri_score_raw)))
             combined = alpha * mri_score + beta * xgb_pred_class
 
-            # Debug output
-            """ st.info(f"MRI feature mean (raw): {mri_score_raw:.4f}")
-            st.info(f"MRI feature mean (sigmoid): {mri_score:.4f}")
-            st.info(f"XGBoost probability: {xgb_pred_prob[0]:.4f}")
-            st.info(f"XGBoost predicted class: {xgb_pred_class}")
-            st.info(f"Combined score: {combined:.4f}") """
+            
 
             # Decision
             prediction = 1 if combined > 0.5 else 0
