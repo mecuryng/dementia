@@ -9,10 +9,6 @@ import numpy as np
 import os
 
 # ==============================
-# Load Models
-# ==============================
-
-# ==============================
 # Model Classes and Loaders
 # ==============================
 class CNN_MRI(nn.Module):
@@ -33,9 +29,12 @@ try:
     else:
         mri_model.load_state_dict(state_dict)
     mri_model.eval()
+     # Display first few weights for verification
+    """first_weight = next(mri_model.resnet.parameters()).flatten()[:10].detach().cpu().numpy()
+    st.info(f"First 10 weights of loaded MRI model: {first_weight}")"""
 except Exception as e:
     st.error(f"Error loading MRI model: {e}")
-    mri_model = None
+    mri_model = None 
 
 # Load XGBoost model
 try:
@@ -103,7 +102,7 @@ feature_labels = [
     
 ]
 for label in feature_labels:
-    val = st.number_input(label, value=0)
+    val = st.number_input(label, value=0.0, format="%0.2f")
     clinical_features.append(val)
 
 
@@ -124,13 +123,26 @@ if st.button("Predict"):
             clinical_array = np.array(clinical_features).reshape(1, -1)
             scaled_sample_data_point = scaler.transform(clinical_array)
             xgb_pred_prob = xgb_model.predict_proba(scaled_sample_data_point)[:, 1]  # Probability for class 1
+            xgb_pred_class = xgb_model.predict(scaled_sample_data_point)[0]  # Predicted class (0 or 1)
 
             # Combine (simple weighted fusion example)
+            import torch.nn.functional as F
             alpha, beta = 0.5, 0.5
-            combined = alpha * mri_features.mean().item() + beta * xgb_pred_prob[0]
+            mri_score_raw = mri_features.mean().item()
+            # Normalize MRI output to [0,1] using sigmoid
+            mri_score = float(torch.sigmoid(torch.tensor(mri_score_raw)))
+            combined = alpha * mri_score + beta * xgb_pred_class
+
+            # Debug output
+            """ st.info(f"MRI feature mean (raw): {mri_score_raw:.4f}")
+            st.info(f"MRI feature mean (sigmoid): {mri_score:.4f}")
+            st.info(f"XGBoost probability: {xgb_pred_prob[0]:.4f}")
+            st.info(f"XGBoost predicted class: {xgb_pred_class}")
+            st.info(f"Combined score: {combined:.4f}") """
 
             # Decision
             prediction = 1 if combined > 0.5 else 0
             st.success(f"Prediction: {'Dementia' if prediction==1 else 'No Dementia'}")
+            st.success(f"Probability of prediction is: {combined:.4f}")
         except Exception as e:
             st.error(f"Prediction failed: {e}")
