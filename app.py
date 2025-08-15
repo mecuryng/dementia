@@ -44,12 +44,21 @@ except Exception as e:
     st.error(f"Error loading XGBoost model: {e}")
     xgb_model = None
 
-# Load Scaler
-try:
-    scaler = joblib.load("scaler.pkl")
-except Exception as e:
-    st.warning("Scaler not found. Please ensure 'scaler.pkl' is present.")
-    scaler = None
+# Load Scaler (check both current and parent directory)
+scaler = None
+scaler_paths = [
+    os.path.join(os.getcwd(), "scaler.pkl"),
+    os.path.abspath(os.path.join(os.getcwd(), "..", "scaler.pkl"))
+]
+for path in scaler_paths:
+    if os.path.exists(path):
+        try:
+            scaler = joblib.load(path)
+            break
+        except Exception as e:
+            st.warning(f"Scaler found at {path} but could not be loaded: {e}")
+if scaler is None:
+    st.warning("Scaler not found. Please ensure 'scaler.pkl' is present in the app or parent directory.")
 
 # ==============================
 # Image Preprocessing
@@ -60,9 +69,6 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-# ==============================
-# Streamlit UI
-# ==============================
 
 # ==============================
 # Streamlit UI
